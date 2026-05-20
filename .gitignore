@@ -1,0 +1,25 @@
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y Editores de Código
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Archivos y carpetas generados por PHP / Composer
+vendor/
+.phpunit.result.cache
+
+# Archivos subidos por los usuarios (uploads)
+# Ignoramos todo el contenido de uploads excepto los archivos .gitkeep para mantener la estructura de directorios
+uploads/**/*
+!uploads/**/.gitkeep
+
+# Archivos de configuración con credenciales locales (base de datos)
+config/database.php
