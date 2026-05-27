@@ -51,7 +51,8 @@ SGA-Academico/
 │       └── student/      # Vistas del panel del estudiante
 ├── config/               # Configuraciones globales
 │   ├── app.php           # Configuración general, sesiones y autoloading
-│   └── database.php      # Parámetros de conexión PDO
+│   ├── database.php.example # Plantilla de conexión a base de datos (copiar como database.php)
+│   └── database.php      # Parámetros de conexión PDO (ignorado en Git)
 ├── database/             # Respaldos de estructura de datos
 │   └── academico.sql     # Script SQL para montar la base de datos
 ├── public/               # Recursos estáticos (Logos, imágenes de la interfaz)
@@ -97,7 +98,10 @@ INSERT INTO `administrador` (`nombre`, `correo`, `password`, `rol`) VALUES
 *   **Contraseña**: `admin123` *(Esta consulta ya incluye la contraseña encriptada correctamente con `bcrypt`)*.
 
 ### 4. Configurar Parámetros de Conexión
-Edita el archivo [config/database.php](file:///c:/Users/carlo/Escritorio/SGA-Academico/config/database.php) si tus credenciales de MySQL (servidor, puerto, usuario o contraseña) son diferentes a las predeterminadas:
+El archivo de configuración real `config/database.php` está ignorado en Git para proteger tus credenciales locales de base de datos. Para configurarlo:
+
+1. Crea una copia del archivo plantilla `config/database.php.example` y asígnale el nombre `config/database.php`.
+2. Edita el archivo [config/database.php](file:///c:/Users/carlo/Escritorio/SGA-Academico/config/database.php) si tus credenciales de MySQL (servidor, puerto, usuario o contraseña) son diferentes a las predeterminadas:
 
 ```php
 define('DB_HOST',    'localhost');
