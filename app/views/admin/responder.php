@@ -14,8 +14,9 @@ require_once __DIR__ . '/../layouts/sidebar_admin.php';
         <a href="/admin/solicitudes.php">Solicitudes</a><span>/</span>
         <span style="color:#94a3b8">SOL-<?= str_pad($id,4,'0',STR_PAD_LEFT) ?></span>
     </div>
-    <div style="display:flex;align-items:center;gap:14px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
         <a href="/admin/solicitudes.php" style="padding:7px 14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:#94a3b8;font-size:.78rem;font-weight:500;text-decoration:none;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">← Volver</a>
+        <a href="/admin/editar-solicitud.php?id=<?= $id ?>" style="padding:7px 14px;background:rgba(255,193,7,0.15);border:1px solid rgba(255,193,7,0.3);border-radius:9px;color:#ffc107;font-size:.78rem;font-weight:600;text-decoration:none;transition:background .15s" onmouseover="this.style.background='rgba(255,193,7,0.25)'" onmouseout="this.style.background='rgba(255,193,7,0.15)'">⚙️ Editar Solicitud</a>
         <div>
             <h1 class="page-title">Solicitud SOL-<?= str_pad($id,4,'0',STR_PAD_LEFT) ?></h1>
             <p class="page-sub"><?= htmlspecialchars($solicitud['tipo_nombre']) ?></p>
@@ -151,6 +152,15 @@ require_once __DIR__ . '/../layouts/sidebar_admin.php';
                     <div>
                         <p style="font-size:.62rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.09em;margin-bottom:2px">Prioridad</p>
                         <p style="font-size:.78rem;color:#1e293b;font-weight:600"><?= htmlspecialchars($solicitud['prioridad']) ?></p>
+                    </div>
+                </div>
+                <div style="padding:12px 16px;border-top:1px solid #f1f5f9;display:flex;flex-direction:column;gap:4px">
+                    <p style="font-size:.62rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.09em;margin-bottom:2px">Plazo / Estado Vencimiento</p>
+                    <div>
+                        <?php 
+                        $plazo = obtenerPlazoSolicitud($solicitud['fecha'], $solicitud['prioridad'], $solicitud['estado']);
+                        echo $plazo['badge_html'];
+                        ?>
                     </div>
                 </div>
             </div>

@@ -33,6 +33,14 @@ if ($uri === '/admin/solicitudes.php') {
     (new AdminController())->solicitudes();
     exit;
 }
+if ($uri === '/admin/nueva-solicitud.php') {
+    (new AdminController())->nuevaSolicitud();
+    exit;
+}
+if ($uri === '/admin/editar-solicitud.php') {
+    (new AdminController())->editarSolicitud();
+    exit;
+}
 if ($uri === '/admin/responder.php') {
     (new AdminController())->responder();
     exit;

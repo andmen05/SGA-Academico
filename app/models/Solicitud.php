@@ -266,4 +266,51 @@ class Solicitud
         );
         $st->execute([$descripcion, $estado, $id]);
     }
+
+    /**
+     * Crea una solicitud con control total de campos por parte del admin
+     */
+    public function createByAdmin(array $data): int
+    {
+        $st = $this->db->prepare(
+            "INSERT INTO SOLICITUD (fecha, estado, prioridad, descripcion, id_estudiante, id_tipo_solicitud)
+             VALUES (?, ?, ?, ?, ?, ?)"
+        );
+        $st->execute([
+            $data['fecha'] ?? date('Y-m-d'),
+            $data['estado'] ?? 'Pendiente',
+            $data['prioridad'] ?? 'Media',
+            $data['descripcion'],
+            $data['id_estudiante'],
+            $data['id_tipo_solicitud'],
+        ]);
+        return (int) $this->db->lastInsertId();
+    }
+
+    /**
+     * Actualiza todos los campos principales de una solicitud (Llave Maestra)
+     */
+    public function update(int $id, array $data): void
+    {
+        $st = $this->db->prepare(
+            "UPDATE SOLICITUD 
+             SET estado = ?, 
+                 prioridad = ?, 
+                 descripcion = ?, 
+                 id_estudiante = ?, 
+                 id_tipo_solicitud = ?, 
+                 fecha = ? 
+             WHERE id_solicitud = ?"
+        );
+        $st->execute([
+            $data['estado'],
+            $data['prioridad'],
+            $data['descripcion'],
+            $data['id_estudiante'],
+            $data['id_tipo_solicitud'],
+            $data['fecha'],
+            $id
+        ]);
+    }
 }
+

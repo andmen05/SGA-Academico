@@ -345,4 +345,139 @@ class AdminController
 
         require __DIR__ . '/../views/admin/reportes.php';
     }
+
+    /**
+     * Permite al administrador crear una solicitud en nombre de cualquier estudiante
+     */
+    public function nuevaSolicitud(): void
+    {
+        requireLogin('admin');
+
+        $estudiantes = $this->estudianteModel->getAll();
+        $tipos       = $this->tipoModel->getAll();
+        $errores     = [];
+        $post        = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $post = $_POST;
+            $id_estudiante     = intval($_POST['id_estudiante'] ?? 0);
+            $id_tipo_solicitud = intval($_POST['id_tipo_solicitud'] ?? 0);
+            $prioridad         = $_POST['prioridad'] ?? 'Media';
+            $estado            = $_POST['estado'] ?? 'Pendiente';
+            $fecha             = $_POST['fecha'] ?? date('Y-m-d');
+            $descripcion       = trim($_POST['descripcion'] ?? '');
+
+            if (!$id_estudiante)     $errores[] = 'Seleccione un estudiante.';
+            if (!$id_tipo_solicitud) $errores[] = 'Seleccione un tipo de solicitud.';
+            if (empty($descripcion))  $errores[] = 'La descripción es obligatoria.';
+
+            if (empty($errores)) {
+                $id = $this->solicitudModel->createByAdmin([
+                    'id_estudiante'     => $id_estudiante,
+                    'id_tipo_solicitud' => $id_tipo_solicitud,
+                    'prioridad'         => $prioridad,
+                    'estado'            => $estado,
+                    'fecha'             => $fecha,
+                    'descripcion'       => $descripcion,
+                ]);
+
+                // Subir documento de soporte opcional
+                if (!empty($_FILES['documento']['name'])) {
+                    $uploadDir = __DIR__ . '/../../uploads/solicitudes/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $ext            = pathinfo($_FILES['documento']['name'], PATHINFO_EXTENSION);
+                    $nombre_archivo = 'sol_' . $id . '_' . time() . '.' . $ext;
+                    $ruta           = '/uploads/solicitudes/' . $nombre_archivo;
+                    move_uploaded_file($_FILES['documento']['tmp_name'], $uploadDir . $nombre_archivo);
+
+                    $this->documentoModel->create([
+                        'nombre_archivo' => $nombre_archivo,
+                        'ruta'           => $ruta,
+                        'tipo'           => $ext,
+                        'id_solicitud'   => $id,
+                    ]);
+                }
+
+                flash('success', 'Nueva solicitud SOL-' . str_pad($id, 4, '0', STR_PAD_LEFT) . ' creada correctamente.');
+                header('Location: /admin/solicitudes.php');
+                exit;
+            }
+        }
+
+        $data = compact('estudiantes', 'tipos', 'errores', 'post');
+        require __DIR__ . '/../views/admin/nueva-solicitud.php';
+    }
+
+    /**
+     * Permite al administrador editar cualquier campo de una solicitud (Llave Maestra)
+     */
+    public function editarSolicitud(): void
+    {
+        requireLogin('admin');
+
+        $id = intval($_GET['id'] ?? 0);
+        $solicitud = $this->solicitudModel->findById($id);
+
+        if (!$solicitud) {
+            flash('error', 'Solicitud no encontrada.');
+            header('Location: /admin/solicitudes.php');
+            exit;
+        }
+
+        $estudiantes = $this->estudianteModel->getAll();
+        $tipos       = $this->tipoModel->getAll();
+        $errores     = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id_estudiante     = intval($_POST['id_estudiante'] ?? 0);
+            $id_tipo_solicitud = intval($_POST['id_tipo_solicitud'] ?? 0);
+            $prioridad         = $_POST['prioridad'] ?? 'Media';
+            $estado            = $_POST['estado'] ?? 'Pendiente';
+            $fecha             = $_POST['fecha'] ?? date('Y-m-d');
+            $descripcion       = trim($_POST['descripcion'] ?? '');
+
+            if (!$id_estudiante)     $errores[] = 'Seleccione un estudiante.';
+            if (!$id_tipo_solicitud) $errores[] = 'Seleccione un tipo de solicitud.';
+            if (empty($descripcion))  $errores[] = 'La descripción es obligatoria.';
+
+            if (empty($errores)) {
+                $this->solicitudModel->update($id, [
+                    'id_estudiante'     => $id_estudiante,
+                    'id_tipo_solicitud' => $id_tipo_solicitud,
+                    'prioridad'         => $prioridad,
+                    'estado'            => $estado,
+                    'fecha'             => $fecha,
+                    'descripcion'       => $descripcion,
+                ]);
+
+                // Subir soporte opcional si se seleccionó uno nuevo
+                if (!empty($_FILES['documento']['name'])) {
+                    $uploadDir = __DIR__ . '/../../uploads/solicitudes/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $ext            = pathinfo($_FILES['documento']['name'], PATHINFO_EXTENSION);
+                    $nombre_archivo = 'sol_' . $id . '_' . time() . '.' . $ext;
+                    $ruta           = '/uploads/solicitudes/' . $nombre_archivo;
+                    move_uploaded_file($_FILES['documento']['tmp_name'], $uploadDir . $nombre_archivo);
+
+                    $this->documentoModel->create([
+                        'nombre_archivo' => $nombre_archivo,
+                        'ruta'           => $ruta,
+                        'tipo'           => $ext,
+                        'id_solicitud'   => $id,
+                    ]);
+                }
+
+                flash('success', 'Solicitud SOL-' . str_pad($id, 4, '0', STR_PAD_LEFT) . ' actualizada correctamente.');
+                header('Location: /admin/solicitudes.php');
+                exit;
+            }
+        }
+
+        $data = compact('solicitud', 'estudiantes', 'tipos', 'errores');
+        require __DIR__ . '/../views/admin/editar-solicitud.php';
+    }
 }

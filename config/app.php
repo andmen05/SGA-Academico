@@ -66,3 +66,70 @@ function e(string $val): string
 {
     return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
 }
+
+/**
+ * Calcula el plazo restante de una solicitud y retorna el badge HTML
+ * y color de fila adecuado según las reglas de SLA por prioridad:
+ * - Alta: 3 días
+ * - Media: 5 días
+ * - Baja: 10 días
+ */
+function obtenerPlazoSolicitud(string $fechaRadicacion, string $prioridad, string $estado): array
+{
+    if (in_array($estado, ['Aprobada', 'Rechazada'])) {
+        return [
+            'dias_restantes' => null,
+            'badge_html' => '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-50 text-green-700 border border-green-200 inline-flex items-center gap-1">✓ Resuelta</span>',
+            'row_style' => '',
+            'texto_plazo' => 'Resuelta'
+        ];
+    }
+
+    $diasSLA = match ($prioridad) {
+        'Alta' => 3,
+        'Baja' => 10,
+        default => 5, // Media
+    };
+
+    $fechaRad = new DateTime($fechaRadicacion);
+    $hoy = new DateTime(date('Y-m-d'));
+    
+    // Calcular fecha límite
+    $fechaLimite = clone $fechaRad;
+    $fechaLimite->modify("+$diasSLA days");
+    
+    // Diferencia en días
+    $diff = $hoy->diff($fechaLimite);
+    $diasRestantes = (int)$diff->format('%r%a');
+
+    if ($diasRestantes <= 0) {
+        if ($diasRestantes === 0) {
+            $badge_html = '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200 inline-flex items-center gap-1">🚨 Vence hoy</span>';
+            $texto_plazo = 'Vence hoy';
+        } else {
+            $diasVencidos = abs($diasRestantes);
+            $badge_html = '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200 inline-flex items-center gap-1">⚠️ Vencida hace ' . $diasVencidos . ' d</span>';
+            $texto_plazo = 'Vencida hace ' . $diasVencidos . ' días';
+        }
+        $row_style = 'background-color: #fef2f2;';
+    } elseif ($diasRestantes === 1) {
+        $badge_html = '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200 inline-flex items-center gap-1">⚠️ Falta 1 día</span>';
+        $texto_plazo = 'Falta 1 día';
+        $row_style = 'background-color: #fef2f2;';
+    } elseif ($diasRestantes === 2) {
+        $badge_html = '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200 inline-flex items-center gap-1">⚠️ Faltan 2 días</span>';
+        $texto_plazo = 'Faltan 2 días';
+        $row_style = 'background-color: #fffbeb;';
+    } else {
+        $badge_html = '<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200 inline-flex items-center gap-1">⏳ Faltan ' . $diasRestantes . ' días</span>';
+        $texto_plazo = 'Faltan ' . $diasRestantes . ' días';
+        $row_style = '';
+    }
+
+    return [
+        'dias_restantes' => $diasRestantes,
+        'badge_html' => $badge_html,
+        'row_style' => $row_style,
+        'texto_plazo' => $texto_plazo
+    ];
+}

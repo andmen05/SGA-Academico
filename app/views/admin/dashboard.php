@@ -98,16 +98,23 @@ $max_val    = max(array_column($top5, 'total') ?: [1]);
                         <th style="text-align:left">Estudiante</th>
                         <th style="text-align:left" class="hidden md:table-cell">Tipo</th>
                         <th style="text-align:left" class="hidden sm:table-cell">Fecha</th>
+                        <th style="text-align:left">Plazo</th>
                         <th style="text-align:left">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($recientes as $s): ?>
-                    <tr>
+                    <?php foreach ($recientes as $s): 
+                        $plazo = obtenerPlazoSolicitud($s['fecha'], $s['prioridad'], $s['estado']);
+                    ?>
+                    <tr style="<?= $plazo['row_style'] ?>">
                         <td><span style="font-family:monospace;font-size:.72rem;color:#94a3b8;background:#f8fafc;padding:2px 6px;border-radius:5px">SOL-<?= str_pad($s['id_solicitud'],4,'0',STR_PAD_LEFT) ?></span></td>
-                        <td style="color:#1e293b;font-weight:500"><?= htmlspecialchars($s['est_nombre'].' '.$s['est_apellido']) ?></td>
+                        <td style="color:#1e293b;font-weight:500">
+                            <?= htmlspecialchars($s['est_nombre'].' '.$s['est_apellido']) ?>
+                            <span class="block text-[10px] text-slate-400 font-normal sm:hidden"><?= $s['fecha'] ?></span>
+                        </td>
                         <td class="hidden md:table-cell"><?= htmlspecialchars($s['tipo_nombre']) ?></td>
                         <td class="hidden sm:table-cell" style="color:#94a3b8"><?= $s['fecha'] ?></td>
+                        <td><?= $plazo['badge_html'] ?></td>
                         <td>
                             <a href="/admin/responder.php?id=<?= $s['id_solicitud'] ?>" class="btn-p" style="padding:5px 14px;font-size:.72rem">Responder</a>
                         </td>
